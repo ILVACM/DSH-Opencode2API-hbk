@@ -1,0 +1,5 @@
+# dsh-opencode-local plugin — bundle patch: insert the plugin loader row.
+- insert:
+    - id: opencode-local
+      name: '@hbk/dsh-opencode-local'
+      config: {}
