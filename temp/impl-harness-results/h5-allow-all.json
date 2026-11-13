@@ -1,0 +1,25 @@
+{
+  "model": "big-pickle",
+  "branch": "cap-bypassed",
+  "approved": 2,
+  "rejected": 0,
+  "maxPerTurn": 1,
+  "agent": "build",
+  "finish": {
+    "kind": "stop"
+  },
+  "textHead": "Both commands ran successfully:\n\n- First: `echo h5-a` → `h5-a`\n- Second: `echo h5-b` → `h5-b`",
+  "diag": {
+    "permissionAsked": 3,
+    "permissionRejected": 0,
+    "toolEvents": 15,
+    "toolApproved": 3,
+    "sessions": [
+      "ses_e2caf2747ffeaVp4Yb2nST20ko",
+      "ses_e2caf1742ffeOxaXFyNf53mvyq",
+      "ses_e2caf0fe0ffe8JSqxG5I3Oa8fz",
+      "ses_e2caf08a5ffeTR5LDFsO9HYnPU",
+      "ses_e2caf016affeVSmrspKIHSbRoU"
+    ]
+  }
+}

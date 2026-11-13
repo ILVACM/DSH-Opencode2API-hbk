@@ -2,7 +2,8 @@
 
 把**本机真实的 opencode CLI** 桥接进 DSH（DeepSeek Harness）的插件。**不伪装**：直接复用你已安装、已登录的官方 CLI，对上游而言就是官方 CLI 在正常使用。全程 TypeScript，零原生依赖。
 
-> 当前版本 **0.2.3**。对外 HTTP API 已**静默保留**（代码在、默认关闭、无设置界面、不再维护投入）——本说明不涉及它。
+> 当前版本 **0.2.4**。对外 HTTP API 已**静默保留**（代码在、默认关闭、无设置界面、不再维护投入）——本说明不涉及它。
+> 注：本 0.2.4 为 2026-11-13 全新构建（固定 build 模式 + 真·完全允许 + external_directory 可勾选），与 11-11 曾实测否决的同号版本内容不同。
 
 ## 前置要求
 
@@ -12,11 +13,11 @@
 
 ## 安装 / 卸载 / 回退
 
-1. 安装：`dsh plugin add hbk-dsh-opencode-local-0.2.3.tgz`（或 DSH 插件管理界面选择该 tgz），目标为 **desktop profile**。
+1. 安装：`dsh plugin add hbk-dsh-opencode-local-0.2.4.tgz`（或 DSH 插件管理界面选择该 tgz），目标为 **desktop profile**。
 2. **完全退出 DSH 再重开**（不是关窗口，是退出进程）。
 3. 设置页出现 **opencode-local** 卡片即成功；模型选择器里出现免费模型。
 4. 卸载：DSH 插件管理里移除本插件，完全退出重开。
-5. 回退：历史包都在仓库 `plugin/` 目录——`0.2.2.tgz`（已验收）、`0.1.0.tgz`（原型）。装旧包同样需完全退出重开。
+5. 回退：历史包（`0.2.1`–`0.2.3.tgz`）已于 2026-11-13 人工清理，**仓库 `plugin/` 现仅保留当前 `0.2.4.tgz`**。需回退时：①从 git 恢复对应 tgz（`git checkout HEAD -- plugin/hbk-dsh-opencode-local-0.2.3.tgz`），或 ②切回 0.2.3 源码后重新 `npm run build && npm pack`。装旧包同样需完全退出重开。
 
 ## 设置页
 
@@ -27,9 +28,10 @@
 
 ### 「可用工具」tab
 - **总开关默认关**：关闭时模型只能纯文本对话。
-- 打开后按**动作白名单**放行：`shell / edit / read / webfetch / websearch / grep / glob` 逐项勾选；**完全允许** = 所有动作（含未列出的）。
-- **每回合次数上限**默认 20（1–1000），防失控。
+- 打开后按**动作白名单**放行：`shell / edit / read / webfetch / websearch / grep / glob / external_directory` 逐项勾选。**完全允许** = 不做任何检查：所有工具请求一律放行（含未列出的动作、工作目录外访问），每回合次数上限不生效；风险全部由你承担，取消勾选立即恢复管控。
+- **每回合次数上限**默认 20（1–1000），防失控；仅在未勾选「完全允许」时生效。
 - 工具活动（`[工具]/[完成]/[失败]`）在 DSH 里**折叠为思考行**，可展开；正文不受影响。
+- 插件会话固定使用 opencode 的 **build** 模式，不受 TUI 当前模式影响。
 
 ### 思考档位
 输入框右侧控件，档位来自当前模型实时上报的 `variants`；默认 default，无效选择自动回退 default。
@@ -46,7 +48,7 @@
 
 - **工具在你本机真实执行**（跑命令、读写文件）。白名单是风险手闸：只勾你信任的动作。
 - 白名单**按动作、不按资源**：放行 `read` 后 `.env` 等敏感文件也可被读取；放行 `shell` 等于允许任意命令。请按需最小勾选。
-- UI 未列出的动作（`external_directory`、`subagent`、`skill` 等）只能经「完全允许」放行；不勾 = 一律拒绝（安全方向）。
+- UI 未列出的动作（`subagent`、`skill`、`question` 等）只能经「完全允许」放行；不勾 = 一律拒绝（安全方向）。`external_directory`（工作目录外文件访问）已列入清单，可单独勾选。
 - 个别情况下工具审批回复失败会导致该回合挂起，看门狗约 120 秒后报超时错误，DSH 会自动重试（最多 4 次）。
 - 错误消息可能带上游响应的前 300 字，仅显示给你本人。
 - 插件自启的 serve 用 **4096 起**的端口；机器上常驻的 `opencode serve --service`（**28894**）是另一个进程，互不影响，别混。
@@ -60,6 +62,7 @@
 | 发对话 30 秒无首事件 / 流中断 120 秒 | 看门狗报错并重试；持续出现查 `serve.log` 与 opencode 自身日志 |
 | 提示 restart budget exhausted | serve 连续重启 3 次失败；检查 opencode CLI 本体能否手动 `opencode serve` 启动 |
 | 回合结束无任何正文（EMPTY_RESPONSE） | 可重试错误，DSH 自动重试；多发生于模型只输出了工具笔记的回合 |
+| 提示工具被禁用但你已勾选放行 | 本版本起跨目录访问对应 `external_directory` 动作：单独勾选它，或勾「完全允许」。旧版本此动作不在清单里，只能靠完全允许 |
 
 ## 构建（开发者）
 
@@ -71,4 +74,4 @@ npm run build       # tsdown → lib/
 npm pack            # 生成 tgz（README 自动随包）
 ```
 
-真实对话回归：`node docs/impl-harness/run-all.mjs`（h1–h4，对话预算 ≤4；运行产物在 temp/，可随时删）。
+真实对话回归：`node docs/impl-harness/run-all.mjs`（h1–h5，对话预算 ≤5；运行产物在 temp/，可随时删）。

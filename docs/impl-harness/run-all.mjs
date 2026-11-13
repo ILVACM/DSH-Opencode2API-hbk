@@ -5,11 +5,12 @@ import * as h1 from './h1-free-filter.mjs'
 import * as h2 from './h2-tools.mjs'
 import * as h3 from './h3-stream.mjs'
 import * as h4 from './h4-api.mjs'
+import * as h5 from './h5-allow-all.mjs'
 
 const summary = { startedAt: new Date().toISOString(), results: {}, failed: [] }
 const runtime = makeRuntime()
 try {
-  for (const [name, mod] of [['h1', h1], ['h2', h2], ['h3', h3], ['h4', h4]]) {
+  for (const [name, mod] of [['h1', h1], ['h2', h2], ['h3', h3], ['h4', h4], ['h5', h5]]) {
     try {
       const out = await mod.run(runtime)
       summary.results[name] = { ok: true, out: out === undefined ? null : String(out) }

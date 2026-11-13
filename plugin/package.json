@@ -1,6 +1,6 @@
 {
   "name": "@hbk/dsh-opencode-local",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Drive the local real opencode CLI from DeepSeek Harness (DSH). No spoofing: the official CLI binary and the user's own login are reused as-is.",
   "type": "module",
   "main": "lib/index.js",

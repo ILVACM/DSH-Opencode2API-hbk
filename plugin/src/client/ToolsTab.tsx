@@ -51,7 +51,7 @@ export function ToolsTab(props: any) {
     )),
     h('label', { className: 'olp-toggle' },
       t('tools.maxPerTurn'),
-      h('input', { type: 'number', min: 1, max: 1000, value: maxShown, disabled: !modeShown, onChange: (e: any) => void writeMax(Number(e.target.value)), style: { width: '80px' } })),
+      h('input', { type: 'number', min: 1, max: 1000, value: maxShown, disabled: !modeShown || allowAll, onChange: (e: any) => void writeMax(Number(e.target.value)), style: { width: '80px' } })),
     h('p', { className: 'olp-hint' }, t('tools.maxPerTurnHint')),
     h('p', { className: 'olp-hint' }, t('tools.saveHint')),
   )

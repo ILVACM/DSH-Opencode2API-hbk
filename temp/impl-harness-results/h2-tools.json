@@ -1,0 +1,18 @@
+{
+  "model": "big-pickle",
+  "branch": "tool-approved",
+  "approved": 1,
+  "finish": {
+    "kind": "stop"
+  },
+  "textHead": "The command output was:\n\n```\np2-impl\n```",
+  "diag": {
+    "permissionAsked": 1,
+    "permissionRejected": 0,
+    "toolEvents": 5,
+    "toolApproved": 1,
+    "sessions": [
+      "ses_e2caf2747ffeaVp4Yb2nST20ko"
+    ]
+  }
+}

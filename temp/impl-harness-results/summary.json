@@ -1,0 +1,28 @@
+{
+  "startedAt": "2026-11-13T05:10:51.751Z",
+  "results": {
+    "h1": {
+      "ok": true,
+      "out": null
+    },
+    "h2": {
+      "ok": true,
+      "out": "tool-approved"
+    },
+    "h3": {
+      "ok": true,
+      "out": null
+    },
+    "h4": {
+      "ok": true,
+      "out": null
+    },
+    "h5": {
+      "ok": true,
+      "out": "cap-bypassed"
+    }
+  },
+  "failed": [],
+  "finishedAt": "2026-11-13T05:11:07.858Z",
+  "allPassed": true
+}

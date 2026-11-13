@@ -3,6 +3,7 @@ import { check, collectStream, firstModel, record, spend } from './lib.mjs'
 export async function run(runtime) {
   runtime.policy.mode = 'allowlist'
   runtime.policy.allow = ['shell']
+  runtime.policy.allowAll = false
   runtime.policy.maxPerTurn = 20
   const model = firstModel(runtime)
   check('h2 model', model.length > 0, 'no selectable model')

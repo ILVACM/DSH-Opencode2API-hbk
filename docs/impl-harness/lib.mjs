@@ -12,7 +12,7 @@ export const BUDGET = { used: 0, cap: 12 }
 
 export function makeRuntime() {
   const activity = new UserActivity()
-  const policy = { mode: 'off', allow: [], maxPerTurn: 20 }
+  const policy = { mode: 'off', allow: [], allowAll: false, maxPerTurn: 20 }
   const manager = new ServeManager(defaultManagerConfig({ opencodePath: '', portBase: 4096, dataDir: path.join(H, '..', '..', 'temp', 'impl-harness-data') }))
   const catalog = new ModelCatalog(manager, { cachePath: path.join(H, '..', '..', 'temp', 'impl-harness-data', 'catalog.json') })
   const adapter = new LocalAdapter({ providerId: 'opencode-local', modelWhitelist: [], titlePrefix: 'dsh-h-', toolPolicy: () => policy, thinkingVariant: () => '', hiddenModels: () => [], activity }, manager, catalog)

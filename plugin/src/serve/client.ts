@@ -109,8 +109,8 @@ export async function getDefaultModel(ep: ServeEndpoint): Promise<ServeModelInfo
   return data ?? null
 }
 
-export async function createSession(ep: ServeEndpoint, title: string, modelRef: ModelRef): Promise<string> {
-  const r = await serveRequest(ep, 'POST', '/api/session', { title, model: modelRef, permissions: ASK_ALL })
+export async function createSession(ep: ServeEndpoint, title: string, modelRef: ModelRef, agent = 'build'): Promise<string> {
+  const r = await serveRequest(ep, 'POST', '/api/session', { title, agent, model: modelRef, permissions: ASK_ALL })
   const id = (r.json as { data?: { id?: string } } | undefined)?.data?.id
   if (r.status !== 200 || typeof id !== 'string' || id.length === 0) {
     throw new Error(`createSession failed: ${r.status} ${r.text.slice(0, 300)}`)

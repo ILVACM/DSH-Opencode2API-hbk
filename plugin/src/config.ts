@@ -85,9 +85,11 @@ export function liveToolPolicy(config: Partial<ResolvedPluginConfig> | undefined
   const mode = unwrap(c.toolMode) === true
   const allow = unwrap(c.toolAllowlist)
   const max = unwrap(c.toolMaxPerTurn)
+  const allowList = Array.isArray(allow) ? allow.filter((x): x is string => typeof x === 'string' && x.length > 0) : []
   return {
     mode: mode ? 'allowlist' : 'off',
-    allow: Array.isArray(allow) ? allow.filter((x): x is string => typeof x === 'string' && x.length > 0) : [],
+    allow: allowList,
+    allowAll: mode && allowList.includes('*'),
     maxPerTurn: clampInt(typeof max === 'number' ? max : 20, 1, 1000, 20),
   }
 }

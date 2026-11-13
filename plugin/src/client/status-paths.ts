@@ -17,4 +17,4 @@ export interface WebModelsPayload {
   models: WebModelRow[]
 }
 
-export const TOOL_ACTIONS = ['shell', 'edit', 'read', 'webfetch', 'websearch', 'grep', 'glob'] as const
+export const TOOL_ACTIONS = ['shell', 'edit', 'read', 'webfetch', 'websearch', 'grep', 'glob', 'external_directory'] as const

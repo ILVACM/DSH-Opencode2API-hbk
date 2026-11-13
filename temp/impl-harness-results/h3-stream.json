@@ -1,0 +1,12 @@
+{
+  "model": "big-pickle",
+  "finish": {
+    "kind": "stop"
+  },
+  "usage": {
+    "inputTokens": 5745,
+    "outputTokens": 3,
+    "cacheReadTokens": 2560
+  },
+  "text": "ok"
+}

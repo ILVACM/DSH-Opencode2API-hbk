@@ -1,0 +1,7 @@
+{
+  "model": "big-pickle",
+  "port": 11096,
+  "models": 12,
+  "chatText": "ok",
+  "streamOk": true
+}

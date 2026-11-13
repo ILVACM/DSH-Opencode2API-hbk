@@ -79,12 +79,16 @@ export async function* runTurn(
               diag.permissionAsked += 1
               const policy = cfg.toolPolicy()
               const action = typeof e.data.action === 'string' ? e.data.action : ''
-              const allowed = policy.mode === 'allowlist'
-                && (policy.allow.includes('*') || policy.allow.includes(action))
-                && approved < policy.maxPerTurn
+              const allowed = policy.allowAll
+                || (policy.mode === 'allowlist'
+                  && (policy.allow.includes('*') || policy.allow.includes(action))
+                  && approved < policy.maxPerTurn)
               const r = await replyDecision(ep, sessionID, requestID, allowed ? 'once' : 'reject', allowed ? APPROVE_MESSAGE : REJECT_MESSAGE)
               if (r.status === 204 || r.status === 200) {
-                if (allowed) { approved += 1; diag.toolApproved += 1 } else { diag.permissionRejected += 1 }
+                if (allowed) {
+                  if (!policy.allowAll) approved += 1
+                  diag.toolApproved += 1
+                } else { diag.permissionRejected += 1 }
               }
             }
           }

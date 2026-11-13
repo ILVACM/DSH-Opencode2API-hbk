@@ -138,5 +138,6 @@ export interface CatalogSnapshot {
 export interface ToolPolicy {
   mode: 'off' | 'allowlist'
   allow: string[]
+  allowAll: boolean
   maxPerTurn: number
 }
