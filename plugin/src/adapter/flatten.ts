@@ -39,3 +39,30 @@ export function flattenHistory(options: HarnessGenerateOptions, toolsEnabled = f
     : 'You have no tools in this channel; reply in plain text.')
   return sections.join('\n\n')
 }
+
+/**
+ * Condense an auxiliary compaction request: replay the prefix, keep the
+ * summarization directive as the final instruction, and add no chat framing.
+ * @param options - the compaction request assembled by DSH.
+ * @returns the single text prompt sent to opencode.
+ */
+export function flattenCompaction(options: HarnessGenerateOptions): string {
+  const msgs: HarnessMessage[] = options.messages
+  let promptIdx = -1
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    if (msgs[i].role === 'user') { promptIdx = i; break }
+  }
+  if (promptIdx < 0) throw new Error('no user message in conversation (INVALID_REQUEST)')
+  const promptText = blockText(msgs[promptIdx].content).trim()
+  if (promptText.length === 0) throw new Error('current user message is empty (INVALID_REQUEST)')
+  const sections: string[] = []
+  if (options.system !== undefined && options.system.trim().length > 0) {
+    sections.push(options.system.trim())
+  }
+  const history = msgs.filter((_, i) => i !== promptIdx)
+  if (history.length > 0) {
+    sections.push(history.map((m) => `[${m.role}]: ` + blockText(m.content).trim()).join('\n\n'))
+  }
+  sections.push(promptText)
+  return sections.join('\n\n')
+}

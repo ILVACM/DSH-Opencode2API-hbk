@@ -83,6 +83,8 @@ export interface HarnessGenerateOptions {
   reasoning?: string
   reasoningEffort?: string
   signal?: AbortSignal
+  /** DSH auxiliary-call marker; 'compaction' means an internal summarization request. */
+  purpose?: string
 }
 
 export type HarnessChunk =

@@ -15,4 +15,12 @@ export const CARD_CSS = `
 .olp-toggle{display:flex;align-items:center;gap:8px;font-size:13px}
 .olp-disabled{opacity:.5}
 .olp-crash{padding:12px;font-size:13px;color:var(--dsw-alias-state-error-primary,#d92d20)}
+.olp-section{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--dsw-alias-border-l2,#2c2d31);border-radius:10px}
+.olp-section-title{font-size:12px;color:var(--dsw-alias-label-tertiary,#999);margin:0}
+.olp-model-hint{font-size:12px;color:var(--dsw-alias-label-tertiary,#999);margin:0}
+.olp-select{font:inherit;font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid var(--dsw-alias-border-l2,#36373b);background:var(--dsw-alias-bg-layer-2,#25262b);color:inherit;max-width:100%}
+.olp-kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;font-size:13px;align-items:baseline}
+.olp-kv-key{color:var(--dsw-alias-label-secondary,#aaa)}
+.olp-kv-val{font-variant-numeric:tabular-nums}
+.olp-ok{font-size:13px;color:var(--dsw-alias-label-secondary,#aaa)}
 `

@@ -33,6 +33,26 @@ function summarizeInput(input: unknown): string {
   }
 }
 
+/**
+ * Reclassify a provider failure reported by opencode. Free gateways answer HTTP
+ * 402 with a rate-limit body, while opencode classifies any 402 as a
+ * non-retryable quota; only an affirmative throttle signal is reclassified so
+ * genuine exhaustion keeps its own code.
+ * @param err - the failure attached to the failed execution event.
+ * @returns message unchanged plus the effective failure code.
+ */
+export function classifyFailure(err: { type?: string; message?: string; status?: number } | undefined): { message: string; code: string } {
+  const rawMessage = typeof err?.message === 'string' && err.message.length > 0 ? err.message : 'session execution failed'
+  const rawCode = typeof err?.type === 'string' && err.type.length > 0 ? err.type : 'UPSTREAM'
+  const text = rawMessage.toLowerCase()
+  const throttled = err?.status === 429
+    || text.includes('too_many_requests')
+    || text.includes('rate_limit_error')
+    || text.includes('rate limit')
+  if (throttled) return { message: rawMessage, code: 'RATE_LIMIT' }
+  return { message: rawMessage, code: rawCode }
+}
+
 export async function* translateEvents(events: AsyncIterable<ServeEvent>, sessionID: string): AsyncGenerator<HarnessChunk> {
   let nextIndex = 0
   const textIndex = new Map<number, number>()
@@ -128,16 +148,7 @@ export async function* translateEvents(events: AsyncIterable<ServeEvent>, sessio
       case 'session.execution.failed': {
         const err = d?.error
         yield { type: 'usage', usage: heldUsage ?? ZERO_USAGE }
-        yield {
-          type: 'finish',
-          reason: {
-            kind: 'error',
-            failure: {
-              message: typeof err?.message === 'string' && err.message.length > 0 ? err.message : 'session execution failed',
-              code: typeof err?.type === 'string' && err.type.length > 0 ? err.type : 'UPSTREAM',
-            },
-          },
-        }
+        yield { type: 'finish', reason: { kind: 'error', failure: classifyFailure(err) } }
         return
       }
       case 'session.execution.interrupted': {

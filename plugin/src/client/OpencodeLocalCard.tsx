@@ -4,6 +4,7 @@ import { MODELS_PATH, MODELS_REFRESH_PATH } from './status-paths.ts'
 import type { WebModelsPayload } from './status-paths.ts'
 import { ModelsTab } from './ModelsTab.tsx'
 import { ToolsTab } from './ToolsTab.tsx'
+import { CompactionTab } from './CompactionTab.tsx'
 
 class CardBoundary extends Component<{ children: ReactNode }, { failed: boolean; message?: string }> {
   state: { failed: boolean; message?: string } = { failed: false }
@@ -23,7 +24,8 @@ class CardBoundary extends Component<{ children: ReactNode }, { failed: boolean;
 function CardBody(props: any) {
   const t = props.t ?? ((k: string) => k)
   const scope = props.scope
-  const [panel, setPanel] = useState<'models' | 'tools'>('models')
+  const sessions = props.sessions
+  const [panel, setPanel] = useState<'models' | 'tools' | 'compaction'>('models')
   const [payload, setPayload] = useState<WebModelsPayload | null>(null)
   const [loading, setLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -62,14 +64,20 @@ function CardBody(props: any) {
     const timer = setInterval(() => { void load() }, 30000)
     return () => clearInterval(timer)
   }, [])
-  const tabBtn = (id: 'models' | 'tools', label: string) =>
+  const tabBtn = (id: 'models' | 'tools' | 'compaction', label: string) =>
     h('button', { key: id, role: 'tab', className: 'olp-tab' + (panel === id ? ' olp-tab-active' : ''), onClick: () => setPanel(id) }, label)
   return h('div', { className: 'olp-card' },
-    h('div', { className: 'olp-tabs', role: 'tablist' }, tabBtn('models', t('tab.models')), tabBtn('tools', t('tab.tools'))),
+    h('div', { className: 'olp-tabs', role: 'tablist' },
+      tabBtn('models', t('tab.models')),
+      tabBtn('tools', t('tab.tools')),
+      tabBtn('compaction', t('tab.compaction')),
+    ),
     error ? h('p', { className: 'olp-error' }, error) : null,
     panel === 'models'
       ? h(ModelsTab, { t, scope, payload, loading, refreshing, onRefresh: refresh })
-      : h(ToolsTab, { t, scope }),
+      : panel === 'tools'
+        ? h(ToolsTab, { t, scope })
+        : h(CompactionTab, { t, scope, sessions }),
   )
 }
 

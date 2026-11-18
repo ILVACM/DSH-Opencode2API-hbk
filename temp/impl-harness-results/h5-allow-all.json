@@ -8,18 +8,18 @@
   "finish": {
     "kind": "stop"
   },
-  "textHead": "Both commands ran successfully:\n\n- First: `echo h5-a` → `h5-a`\n- Second: `echo h5-b` → `h5-b`",
+  "textHead": "- Command: `echo h5-a` → Output: `h5-a`\n- Command: `echo h5-b` → Output: `h5-b`",
   "diag": {
     "permissionAsked": 3,
     "permissionRejected": 0,
     "toolEvents": 15,
     "toolApproved": 3,
     "sessions": [
-      "ses_e2caf2747ffeaVp4Yb2nST20ko",
-      "ses_e2caf1742ffeOxaXFyNf53mvyq",
-      "ses_e2caf0fe0ffe8JSqxG5I3Oa8fz",
-      "ses_e2caf08a5ffeTR5LDFsO9HYnPU",
-      "ses_e2caf016affeVSmrspKIHSbRoU"
+      "ses_e115e4290ffeEZGX290Ch25hTV",
+      "ses_e115e16bdffeT6HOVv9wzE8axj",
+      "ses_e115e0c4bffeGEtPQi2GN1u275",
+      "ses_e115de867ffeanGyP3XOgQI0js",
+      "ses_e115dc9d0ffeOeG3sTXdBgMXTc"
     ]
   }
 }

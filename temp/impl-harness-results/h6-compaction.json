@@ -1,0 +1,10 @@
+{
+  "model": "big-pickle",
+  "finish": {
+    "kind": "stop"
+  },
+  "rejected": 0,
+  "agent": "build",
+  "title": "dsh-h-compact-big-pickle-mwm3mee8",
+  "textHead": "## Checkpoint\n\n- **Environment:** OpenCode coding-agent session in `D:\\DSH-Opencode2API-hbk`; workspace is a Git repo on Windows.\n- **Capabilities available:** "
+}

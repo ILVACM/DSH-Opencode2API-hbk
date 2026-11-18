@@ -4,9 +4,9 @@
     "kind": "stop"
   },
   "usage": {
-    "inputTokens": 5745,
+    "inputTokens": 6999,
     "outputTokens": 3,
-    "cacheReadTokens": 2560
+    "cacheReadTokens": 1536
   },
   "text": "ok"
 }

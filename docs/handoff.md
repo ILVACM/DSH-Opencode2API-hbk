@@ -15,8 +15,8 @@
 
 - DSH **0.2.2-rc.1**（Windows）；opencode **v2.2.6**；Node **v24.21.0**
 - 正式插件代码在仓库根 **`plugin/`**（npm 包 `@hbk/dsh-opencode-local`，provider id `opencode-local`）
-- **当前仓库代码 = 0.2.3**（`plugin/package.json` 为 `0.2.3`，0.2.4 实测否决已回退）；0.2.2、0.2.3 均已人工验收
-- 安装在 **desktop profile**：`C:\Users\hbk\.dsh\profiles\desktop`（注意：不是 web profile；用户一贯要求 desktop 形态）
+- **当前仓库代码 = 0.2.6**（`plugin/package.json` 为 `0.2.6`）；0.2.2–0.2.5 已人工验收；**0.2.6 已于 2026-11-18 重启后人工验收通过，全部版本验收完毕，项目回到维护态**
+- 安装在 **web profile**：`C:\Users\hbk\.dsh\profiles\web`（⭐ 2026-11-16 起：**用户使用形态为 web**，其对应插件 profile 即 `web`；desktop 与 web **共用同一 cordis 底座**。⚠️ 旧的「安装/验收走 desktop profile」约定**已过时**，勿再按 desktop 操作）
 - 参考源码克隆（opencode-dev / opencode2dsh-master / dsh-connect-workbuddy-main）**已随 temp/ 清理删除**（2026-11-12，用户别处有备份）；GUI 契约报告保留在 `docs/dsh-connect-workbuddy-analyze.md`
 - **用户新克隆的最新 opencode 发布源码在 `D:\opencode`**（git `12a661ea40`，2026-11-09 克隆），排查上游行为优先读它；DSH 源码在 `D:\deepseek-harness`（只读）
 
@@ -112,9 +112,11 @@ DSH 聊天(入口A) ──LlmAdapter──┐
 
 ## 10. 下一步
 
-**无待办——项目已收尾（2026-11-12），后续仅维护。**
+**当前状态：0.2.6 已施工、打包、安装到 web profile，并已于 2026-11-18 重启后人工验收通过——本轮迭代关闭，项目回到维护态。**
 
-- 当前交付：`plugin/hbk-dsh-opencode-local-0.2.4.tgz`（含 README，2026-11-13 A+B 修复，已装 desktop profile、待重启后实机验收）；使用与故障速查见 `plugin/README.md`；上一稳定回退包 `plugin/hbk-dsh-opencode-local-0.2.3.tgz`（已验收）。
+- 当前交付：`plugin/hbk-dsh-opencode-local-0.2.6.tgz`（28523 B / SHA256 `B15928B1…`，已装 **web** profile，**已验收**）；使用与故障速查见 `plugin/README.md`；上一稳定回退包 `plugin/hbk-dsh-opencode-local-0.2.5.tgz`（27051 B / `384183D7…`，已人工验收）。
+- 0.2.6 内容：**压缩模型偏好轻量化**——从 DSH profile 配置迁到插件自有 `~/.dsh-opencode-local/compaction.json`（全局），切换压缩模型**即时生效**（乐观更新 + 一次轻量写），不再触发 profile 重组/serve 重启；配套 `GET/POST /plugins/opencode-local/compaction` 路由、启动期旧值迁移、损坏/缺失回落官方默认。详见 `docs/P2/code-debug-0.2.6.md`、`docs/P2/impl-notes-0.2.6.md`。
+- 0.2.5 内容：①压缩请求识别（`purpose:'compaction'` → 精简形态 / 工具不放行 / `compact-` 标题）；②**设置页新增「上下文压缩」tab**（一键压缩 + 压缩专用模型选择器 + 只读上下文面板）；③**`llm/stream` 路由改写**把人工与自动压缩统一到选择器指定模型（默认官方，仅为保底，第三方 API 同级）；④402 限流正确改判 + 压缩内部有限重试。详见 `docs/P2/code-debug-0.2.5.md`、`docs/P2/impl-notes-0.2.5.md`。
 - 维护触发点：opencode / DSH 版本升级导致契约漂移；想启用 API 或分发他人（**须先补回**双入口并发压测、工具拦截第三层、安全审计 API 部分，见 §4）。
 - git 与归档仍由人工接管。
 - 2026-11-12 晚自适应清理（人工授权「自适应清理问题」）：①删除 desktop `cordis.patch.yml` 中 0.2.1 探测时代残留的 `opencode-local-probe` 条目（包本就不存在，YAML 仍解析为 15 条目，已备份）；②修正 README 不存在的 `0.1.0.tgz` 回退指引；③本文档 §8/§9 的 git 状态与运行时数据描述、历史包清单已按实测更新；④0.2.3 重新打包（README 变更）。详见 §12。
@@ -158,4 +160,36 @@ DSH 聊天(入口A) ──LlmAdapter──┐
 - 收尾：README 回退指引按人工清理历史包的事实修正，同版本重打包（lib 字节不变）；最新字节数/shasum 见实施记录。
 - 环境漂移：opencode v2.2.7（原记 2.2.6），只读复核上游契约未变，h5 实机断言通过。
 - 历史包 `0.2.1/0.2.2/0.2.3.tgz` 于 2026-11-13 人工清理（工作区删除、未提交），`plugin/` 仅留 0.2.4.tgz；回退需从 git 恢复或重新打包。
+- git 提交仍由人工接管。
+
+## 14. 2026-11-16 0.2.5 执行记录（压缩统一改道 + 上下文压缩 tab）
+
+> 人工指令：「根据 `temp/code.md`『执行』优化迭代，修改完代码后，直接重装插件到 web 中」。计划模式提交方案并获批后执行。
+> 定案依据 `temp/debug.md` v8；施工依据 `temp/code.md`（归档 `docs/P2/code-debug-0.2.5.md`）；执行记录 `docs/P2/impl-notes-0.2.5.md`。
+
+- **核心机制变更（D13'）**：不再试图写 DSH 原生 `summarizationProvider/Model`（探针证明运行时不可写：构造期 deepFreeze、无 volatile、嵌套 4 个预设重复 id、settings 寻址不到），改为在 **`llm/stream` waterfall** 上识别 `purpose==='compaction'` 并就地改 `options.provider/model` —— 人工 `/compact` 与切模型自动压缩共用同一出口，**一次挂岗全跟随**。
+- **执行方式**：多 agent 并行（2 探针 + 5 工作包，文件两两无交集；`status-paths.ts` 归 W4 独占写）。串行验证：`typecheck`（双 tsconfig）0 错、`build` 成功、`run-all` **h1–h7 全过 `allPassed:true`**。
+- **测试修正（非产品缺陷）**：h6 原断言误用 `flattenHistory(options,false)` 校验 `You may use the available tools` 尾注（该尾注仅在 `toolsEnabled=true` 出现）。已拆成 false/true 两分支校验并**新增** `chatTools` 断言（比原方案更严）；`temp/code.md` 已同步。
+- **打包**：`hbk-dsh-opencode-local-0.2.5.tgz` 27051 B / SHA256 `384183D76C6E59F4CB63B5E80076D9CC731DBE3213D6285D49A868F7810A5FA7`；包内 5 条目。
+- **安装**：`dsh plugin --profile web add …` 成功（0.2.4 → 0.2.5）；web `cordis.patch.yml` **整文件未变**（SHA256 `EED1FF55…`）；已装 lib 与构建产物**逐字节一致**；**未重启**。
+- **备份**：`temp/reinstall-backup/cordis.patch.yml.bak-0.2.5-20261116-212446`。
+- **待办**：人工重启后按 `docs/P2/impl-notes-0.2.5.md §5`（A1–A6 / B1–B11）实机验收；重点看「切模型不再报 402」与「上下文压缩 tab 三块齐全」。
+- git 提交仍由人工接管。
+
+## 15. 2026-11-18 0.2.6 执行记录（压缩模型偏好轻量化：迁出 profile 配置）
+
+> 人工指令：按 `temp/debug.md`（v3 定案）执行，完成后打包 0.2.6 并重装到 web profile。计划模式提交方案并获批后执行。
+> 定案依据 `temp/debug.md` v3；施工依据 `temp/code.md` v2（归档 `docs/P2/code-debug-0.2.6.md`）；执行记录 `docs/P2/impl-notes-0.2.6.md`。
+
+- **背景**：0.2.5 实机验收通过，但「上下文压缩」tab 的压缩模型选择器切换缓慢——根因是偏好借道 DSH 配置系统，每写一次触发**重写整份 `cordis.patch.yml` + profile 重组 + serve 重启**（无任何成功性检测）。人工裁决：**改存插件自有 JSON**（`~/.dsh-opencode-local/compaction.json`，全局），不走 DSH 官方存储（避免硬 `inject` 连坐与鸭子类型投机）。
+- **实现**：新增 `compaction-store.ts`（同步容错读 + mtime/size 缓存 + 异步原子写 tmp+rename+Windows 重试 + 幂等短路 + 写后失效缓存 + 一次性迁移）；`config.ts` 删除两个压缩配置字段与 `liveCompactionProvider/Model`；新增 `GET/POST /plugins/opencode-local/compaction`（单 handler 分流，避免重复路径注册）；`llm/stream` 监听器**仅压缩请求**动态读 store；`CompactionTab` 改为打开面板 GET 一次 + 点选**乐观更新**失败回滚。`applyCompactionRoute` 判断逻辑一字未动。
+- **执行方式**：多 agent 并行（2 探针通过 + 5 工作包）；4 个执行者中途失败，但盘点证实 A/C/D/E 已落盘且与施工图一致，**仅 B 组两文件由主执行者串行补完**（`code.md §1.3` 允许串行，产物一致）。
+- **验收**：typecheck 双配置 0 错（首轮抓到 A 组删除不完整 5 处 TS 错误，补删后通过）；build 成功且 **lib 无新增外部包**；`run-all` **h1–h7 全过 `allPassed:true`**（h6 压缩实机断言保持，h7 新增解析/读写/幂等/自愈/迁移用例全过，临时文件已清理）。
+- **打包**：`hbk-dsh-opencode-local-0.2.6.tgz` **28523 B** / SHA256 `B15928B1178082F53E103E71B403B034B53CA54228322534C66C3100EE19C78A`；包内 5 条目。
+- **安装**：web profile `0.2.5 → 0.2.6` 成功；**`dsh plugin add` 未改动 `cordis.patch.yml`**（安装前后 71784 B 字节级相同）；已装 lib 与构建产物逐字节一致；**未重启**。
+- **patch 哈希说明**：P0 基线 `31CC092C…` 与安装前 `81BBAF0C…` 不同，发生在 11-17→11-18 施工暂停期间（约一天，本执行无任何写操作），属环境自身漂移，与本次施工无关；两份文件均已留档备查。
+- **备份**：源码 `temp/backup-0.2.5-src/`（0.2.5 未提交 git，回退用它，**勿用** `git checkout HEAD`）；patch `temp/reinstall-backup/cordis.patch.yml.bak-0.2.6-20261118-203002`。
+- **验收结果（2026-11-18 人工确认）**：✅ **全部改进生效并通过验收**。
+- **⚠️ 部署插曲（已解决，留档防再犯）**：`dsh plugin add` **不会重载已运行 DSH 进程里的插件后端**——安装后立即使用时出现「前端新（0.2.6 请求新路由 `/plugins/opencode-local/compaction`）、后端旧（0.2.5 无此路由）」→ 404 空响应 → 浏览器报 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`。**完全退出并重启 DSH 后消失**。结论：**`dsh plugin add` 之后必须重启 DSH 才算部署完成**；匿名 curl 探针（存在→401 / 不存在→404）可快速区分此类问题。
+- **遗留观察项（无碍使用）**：profile patch 中残留的旧 `compactionProvider/compactionModel` 键按裁决不清理（schema 已删，无害）；若 DSH 未来对插件存储/配置行为有变化，优先复查 `compaction.json` 读写。
 - git 提交仍由人工接管。

@@ -5,14 +5,14 @@
   "finish": {
     "kind": "stop"
   },
-  "textHead": "The command output was:\n\n```\np2-impl\n```",
+  "textHead": "p2-impl",
   "diag": {
     "permissionAsked": 1,
     "permissionRejected": 0,
     "toolEvents": 5,
     "toolApproved": 1,
     "sessions": [
-      "ses_e2caf2747ffeaVp4Yb2nST20ko"
+      "ses_e115e4290ffeEZGX290Ch25hTV"
     ]
   }
 }

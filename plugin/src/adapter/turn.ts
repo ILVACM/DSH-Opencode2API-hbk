@@ -1,5 +1,5 @@
 import { createSession, interruptSession, openSSE, prompt, replyDecision } from '../serve/client.ts'
-import { flattenHistory } from './flatten.ts'
+import { flattenCompaction, flattenHistory } from './flatten.ts'
 import { TERMINAL_EVENT_TYPES, translateEvents } from './translate.ts'
 import type {
   AdapterDiagnostics,
@@ -12,6 +12,9 @@ import type {
 } from '../types.ts'
 
 export const TURN_WATCHDOG_POLL_MS = 200
+export const COMPACT_MAX_ATTEMPTS = 3
+export const COMPACT_RETRY_BASE_MS = 2000
+export const COMPACT_RETRY_MAX_MS = 8000
 const REJECT_MESSAGE = 'tools are disabled or not allowed in this channel; reply in plain text'
 const APPROVE_MESSAGE = 'approved by deepseek harness'
 
@@ -26,6 +29,47 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms))
 }
 
+/**
+ * Run one compaction request with a bounded retry wrapped around whole turns.
+ * @param ep - serve endpoint.
+ * @param cfg - turn configuration.
+ * @param options - the compaction request.
+ * @param modelRef - resolved opencode model.
+ * @param diag - shared diagnostics.
+ */
+export async function* runCompactTurn(
+  ep: ServeEndpoint,
+  cfg: TurnConfig,
+  options: HarnessGenerateOptions,
+  modelRef: ModelRef,
+  diag: AdapterDiagnostics,
+): AsyncGenerator<HarnessChunk> {
+  for (let attempt = 1; attempt <= COMPACT_MAX_ATTEMPTS; attempt += 1) {
+    if (options.signal?.aborted === true) return
+    let retryable = false
+    for await (const chunk of runTurnOnce(ep, cfg, options, modelRef, diag)) {
+      if (chunk.type === 'finish' && chunk.reason.kind === 'error') {
+        const code = chunk.reason.failure.code
+        const transient = code === 'RATE_LIMIT' || code === 'TRANSPORT' || code === 'EMPTY_RESPONSE'
+        if (transient && attempt < COMPACT_MAX_ATTEMPTS) { retryable = true; break }
+      }
+      yield chunk
+    }
+    if (!retryable) return
+    const delay = Math.min(COMPACT_RETRY_BASE_MS * 2 ** (attempt - 1), COMPACT_RETRY_MAX_MS)
+    await sleep(delay)
+  }
+}
+
+/**
+ * Drive one opencode turn; compaction requests use the compact prompt form and
+ * never approve tools.
+ * @param ep - serve endpoint.
+ * @param cfg - turn configuration.
+ * @param options - the request.
+ * @param modelRef - resolved opencode model.
+ * @param diag - shared diagnostics.
+ */
 export async function* runTurn(
   ep: ServeEndpoint,
   cfg: TurnConfig,
@@ -33,8 +77,31 @@ export async function* runTurn(
   modelRef: ModelRef,
   diag: AdapterDiagnostics,
 ): AsyncGenerator<HarnessChunk> {
-  const text = flattenHistory(options, cfg.toolPolicy().mode === 'allowlist')
-  const title = `${cfg.titlePrefix}${options.model}-${Date.now().toString(36)}`
+  if (options.purpose === 'compaction') {
+    yield* runCompactTurn(ep, cfg, options, modelRef, diag)
+    return
+  }
+  yield* runTurnOnce(ep, cfg, options, modelRef, diag)
+}
+
+/**
+ * Perform exactly one turn: create the session, stream events, translate chunks.
+ * @param ep - serve endpoint.
+ * @param cfg - turn configuration.
+ * @param options - the request.
+ * @param modelRef - resolved opencode model.
+ * @param diag - shared diagnostics.
+ */
+async function* runTurnOnce(
+  ep: ServeEndpoint,
+  cfg: TurnConfig,
+  options: HarnessGenerateOptions,
+  modelRef: ModelRef,
+  diag: AdapterDiagnostics,
+): AsyncGenerator<HarnessChunk> {
+  const isCompaction = options.purpose === 'compaction'
+  const text = isCompaction ? flattenCompaction(options) : flattenHistory(options, cfg.toolPolicy().mode === 'allowlist')
+  const title = `${cfg.titlePrefix}${isCompaction ? 'compact-' : ''}${options.model}-${Date.now().toString(36)}`
   const queue: ServeEvent[] = []
   let notify: (() => void) | null = null
   let closed = false
@@ -79,10 +146,10 @@ export async function* runTurn(
               diag.permissionAsked += 1
               const policy = cfg.toolPolicy()
               const action = typeof e.data.action === 'string' ? e.data.action : ''
-              const allowed = policy.allowAll
+              const allowed = !isCompaction && (policy.allowAll
                 || (policy.mode === 'allowlist'
                   && (policy.allow.includes('*') || policy.allow.includes(action))
-                  && approved < policy.maxPerTurn)
+                  && approved < policy.maxPerTurn))
               const r = await replyDecision(ep, sessionID, requestID, allowed ? 'once' : 'reject', allowed ? APPROVE_MESSAGE : REJECT_MESSAGE)
               if (r.status === 204 || r.status === 200) {
                 if (allowed) {

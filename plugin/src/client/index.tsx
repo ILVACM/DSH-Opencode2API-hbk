@@ -18,6 +18,7 @@ export function apply(ctx: any): void {
     ctx.effect?.(() => ctx.locale.register(ns, { zh, en }))
     const t = ctx.locale.bind(ns)
     const forms = ctx.get?.('configForms')
+    const sessions = ctx.get?.('sessions')
     let scope: any = undefined
     let cardDisposer: any = undefined
     let composerDisposer: any = undefined
@@ -25,7 +26,7 @@ export function apply(ctx: any): void {
       if (cardDisposer) { try { cardDisposer() } catch { /* ignore */ } }
       cardDisposer = ctx.slots.register({
         name: 'settings.section', id: 'opencode-local', order: 50,
-        label: () => t('nav.panel'), locale: ns, inject: () => ({ t, scope, surface: 'settings' }),
+        label: () => t('nav.panel'), locale: ns, inject: () => ({ t, scope, surface: 'settings', sessions }),
       }, OpencodeLocalCard)
     }
     const registerComposer = () => {

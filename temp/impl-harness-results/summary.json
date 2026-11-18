@@ -1,5 +1,5 @@
 {
-  "startedAt": "2026-11-13T05:10:51.751Z",
+  "startedAt": "2026-11-18T12:28:58.022Z",
   "results": {
     "h1": {
       "ok": true,
@@ -20,9 +20,17 @@
     "h5": {
       "ok": true,
       "out": "cap-bypassed"
+    },
+    "h6": {
+      "ok": true,
+      "out": "ok"
+    },
+    "h7": {
+      "ok": true,
+      "out": "ok"
     }
   },
   "failed": [],
-  "finishedAt": "2026-11-13T05:11:07.858Z",
+  "finishedAt": "2026-11-18T12:29:51.638Z",
   "allPassed": true
 }
