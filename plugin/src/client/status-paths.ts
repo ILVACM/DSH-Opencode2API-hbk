@@ -3,8 +3,6 @@ export const MODELS_REFRESH_PATH = '/plugins/opencode-local/models/refresh'
 export const CATALOG_PATH = '/plugins/opencode-local/catalog'
 export const CATALOG_REFRESH_PATH = '/plugins/opencode-local/catalog/refresh'
 export const CONTEXT_PATH = '/plugins/opencode-local/context'
-export const COMPACT_PATH = '/plugins/opencode-local/compact'
-export const COMPACTION_PATH = '/plugins/opencode-local/compaction'
 
 export interface WebModelRow {
   id: string
@@ -35,16 +33,8 @@ export interface WebCatalogGroup {
 }
 
 export interface WebCatalogPayload {
-  default?: { provider?: string; model?: string }
   groups?: WebCatalogGroup[]
   failures?: Array<{ id: string; name?: string; message: string }>
-}
-
-export interface WebCompactionPayload {
-  version?: number
-  provider?: string
-  model?: string
-  error?: string
 }
 
 export const TOOL_ACTIONS = ['shell', 'edit', 'read', 'webfetch', 'websearch', 'grep', 'glob', 'external_directory'] as const

@@ -77,7 +77,7 @@ function CardBody(props: any) {
       ? h(ModelsTab, { t, scope, payload, loading, refreshing, onRefresh: refresh })
       : panel === 'tools'
         ? h(ToolsTab, { t, scope })
-        : h(CompactionTab, { t, scope, sessions }),
+        : h(CompactionTab, { t, useSessions: props.useSessions }),
   )
 }
 

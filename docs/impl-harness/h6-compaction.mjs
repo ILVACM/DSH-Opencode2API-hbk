@@ -1,8 +1,6 @@
 import { check, collectStream, firstModel, record, spend } from './lib.mjs'
 import { classifyFailure } from '../../plugin/src/adapter/translate.ts'
 import { flattenCompaction, flattenHistory } from '../../plugin/src/adapter/flatten.ts'
-import { applyCompactionRoute } from '../../plugin/src/config.ts'
-import { DEFAULT_COMPACTION, readCompactionFile } from '../../plugin/src/compaction-store.ts'
 
 const THROTTLE_402 = '{"code":"too_many_requests","message":"AppId:**7f4z Usage limit reached.","type":"rate_limit_error"}'
 
@@ -52,21 +50,6 @@ export async function run(runtime) {
   let threw = false
   try { flattenCompaction({ provider: 'p', model: 'm', messages: [msg('assistant', 'only')] }) } catch { threw = true }
   check('h6 compact rejects missing user message', threw, 'no throw on missing user message')
-
-  // A1' — compaction routes onto the configured model; chat is untouched.
-  const absent = readCompactionFile('temp/impl-harness-data/__h6-absent-store__.json')
-  check('h6 missing store falls back', absent.provider === DEFAULT_COMPACTION.provider && absent.model === DEFAULT_COMPACTION.model, JSON.stringify(absent))
-  const routed = { purpose: 'compaction', provider: 'opencode-local', model: 'free-x' }
-  check('h6 compaction rerouted',
-    applyCompactionRoute(routed, 'deepseek-official', 'deepseek-flash') === true
-      && routed.provider === 'deepseek-official' && routed.model === 'deepseek-flash', JSON.stringify(routed))
-  const plain = { provider: 'opencode-local', model: 'free-x' }
-  check('h6 plain request untouched',
-    applyCompactionRoute(plain, 'deepseek-official', 'deepseek-flash') === false
-      && plain.provider === 'opencode-local' && plain.model === 'free-x', JSON.stringify(plain))
-  const equal = { purpose: 'compaction', provider: 'deepseek-official', model: 'deepseek-flash' }
-  check('h6 equal route is a no-op',
-    applyCompactionRoute(equal, 'deepseek-official', 'deepseek-flash') === false, 'reported a change')
 
   // A3 + C2 — compaction через adapter: no tools approved, compact- title, build agent.
   const model = firstModel(runtime)

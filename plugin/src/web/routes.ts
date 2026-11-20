@@ -1,13 +1,10 @@
 import type { ModelCatalog } from '../catalog/models.ts'
 import type { CatalogEntry } from '../types.ts'
-import { COMPACTION_FILE_VERSION } from '../compaction-store.ts'
 
 export interface WebRouteDeps {
   catalog: ModelCatalog
   hiddenModels: () => string[]
   refresh: () => Promise<void>
-  compaction: () => { provider: string; model: string }
-  setCompaction: (next: { provider: string; model: string }) => Promise<void>
 }
 
 export function publicModelRow(e: CatalogEntry, hidden: Set<string>): Record<string, unknown> {
@@ -27,14 +24,6 @@ function send(res: any, status: number, body: unknown): void {
   res.statusCode = status
   res.setHeader('content-type', 'application/json')
   res.end(JSON.stringify(body))
-}
-
-async function readJson(req: any): Promise<any> {
-  const chunks: Buffer[] = []
-  for await (const chunk of req) chunks.push(Buffer.from(chunk))
-  const text = Buffer.concat(chunks).toString('utf8')
-  if (text.trim().length === 0) return undefined
-  try { return JSON.parse(text) } catch { return undefined }
 }
 
 export function registerWebRoutes(ctx: any, deps: WebRouteDeps): void {
@@ -67,42 +56,15 @@ export function registerWebRoutes(ctx: any, deps: WebRouteDeps): void {
         send(res, 200, payload())
       },
     })
-
-    // One path, method-dispatched: the webServer rejects duplicate path registrations.
-    ws.register({
-      kind: 'exact',
-      path: '/plugins/opencode-local/compaction',
-      handler: async (req: any, res: any) => {
-        if (req.method === 'GET') {
-          const current = deps.compaction()
-          return send(res, 200, { version: COMPACTION_FILE_VERSION, provider: current.provider, model: current.model })
-        }
-        if (req.method !== 'POST') return send(res, 405, { error: 'method not allowed' })
-        const body = await readJson(req)
-        const provider = typeof body?.provider === 'string' ? body.provider.trim() : ''
-        const model = typeof body?.model === 'string' ? body.model.trim() : ''
-        if (provider.length === 0 || model.length === 0) return send(res, 400, { error: 'provider and model required' })
-        try {
-          await deps.setCompaction({ provider, model })
-        } catch (err) {
-          return send(res, 500, { error: err instanceof Error ? err.message : String(err) })
-        }
-        const saved = deps.compaction()
-        send(res, 200, { version: COMPACTION_FILE_VERSION, provider: saved.provider, model: saved.model })
-      },
-    })
   })
 
-  // Full catalog, live context readings, and on-demand compaction. Registered in a
-  // separate block so a composition missing one host service still serves the
-  // model routes above.
+  // Full catalog and live context readings. Registered in a separate block so a
+  // composition missing one host service still serves the model routes above.
   ctx.inject?.(
-    ['webServer', 'llm', 'commands', 'agents', 'sessions', 'tokenMeter', 'sessionProjections'],
+    ['webServer', 'llm', 'sessions', 'tokenMeter', 'sessionProjections'],
     (richCtx: any) => {
       const ws = richCtx.webServer ?? richCtx.get?.('webServer')
       const llm = richCtx.llm ?? richCtx.get?.('llm')
-      const commands = richCtx.commands ?? richCtx.get?.('commands')
-      const agents = richCtx.agents ?? richCtx.get?.('agents')
       const sessions = richCtx.sessions ?? richCtx.get?.('sessions')
       const tokenMeter = richCtx.tokenMeter ?? richCtx.get?.('tokenMeter')
       const sessionProjections = richCtx.sessionProjections ?? richCtx.get?.('sessionProjections')
@@ -111,7 +73,6 @@ export function registerWebRoutes(ctx: any, deps: WebRouteDeps): void {
       const buildCatalog = async (): Promise<Record<string, unknown>> => {
         const groups: Array<Record<string, unknown>> = []
         const failures: Array<Record<string, unknown>> = []
-        const defaultRoute = deps.compaction()
         let providers: Array<{ id: string; name?: string }> = []
         try { providers = llm.listProviders() ?? [] } catch { providers = [] }
         for (const provider of providers) {
@@ -138,7 +99,7 @@ export function registerWebRoutes(ctx: any, deps: WebRouteDeps): void {
             failures.push({ id: provider.id, name: provider.name, message: err instanceof Error ? err.message : String(err) })
           }
         }
-        return { default: defaultRoute, groups, failures }
+        return { groups, failures }
       }
 
       ws.register({
@@ -198,35 +159,6 @@ export function registerWebRoutes(ctx: any, deps: WebRouteDeps): void {
             ...(totalTokens === undefined ? {} : { totalTokens }),
             ...(percent === undefined ? {} : { percent }),
           })
-        },
-      })
-
-      ws.register({
-        kind: 'exact',
-        path: '/plugins/opencode-local/compact',
-        handler: async (req: any, res: any) => {
-          if (req.method !== 'POST') return send(res, 405, { error: 'method not allowed' })
-          const body = await readJson(req)
-          const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : ''
-          if (sessionId.length === 0) return send(res, 400, { ok: false, error: 'sessionId required' })
-          if (!commands?.execute) return send(res, 503, { ok: false, error: 'commands unavailable' })
-          let agent: any
-          try { agent = agents?.get?.(sessionId) } catch { agent = undefined }
-          if (agent === undefined || agent === null) return send(res, 404, { ok: false, error: 'session not found' })
-          const controller = new AbortController()
-          req.on?.('close', () => { if (!controller.signal.aborted) controller.abort() })
-          try {
-            const result = await commands.execute(agent, '/compact', [], controller.signal)
-            if (result === undefined) return send(res, 200, { ok: false, kind: 'error', text: 'compact command unavailable' })
-            send(res, 200, {
-              ok: result.result?.kind === 'success',
-              kind: result.result?.kind ?? 'error',
-              text: result.result?.text ?? '',
-              ...(result.result?.sourceEventSeq === undefined ? {} : { sourceEventSeq: result.result.sourceEventSeq }),
-            })
-          } catch (err) {
-            send(res, 200, { ok: false, kind: 'error', text: err instanceof Error ? err.message : String(err) })
-          }
         },
       })
     },

@@ -118,24 +118,3 @@ export function liveApiConfig(config: Partial<ResolvedPluginConfig> | undefined 
     token: typeof token === 'string' ? token : '',
   }
 }
-
-/**
- * Redirect one compaction request onto the configured model in place.
- * @param options - the request reaching the `llm/stream` waterfall.
- * @param provider - configured compaction provider.
- * @param model - configured compaction model.
- * @returns whether the route changed; non-compaction requests are never touched.
- */
-export function applyCompactionRoute(
-  options: { purpose?: string; provider?: string; model?: string },
-  provider: string,
-  model: string,
-): boolean {
-  if (options === undefined || options === null) return false
-  if (options.purpose !== 'compaction') return false
-  if (provider.length === 0 || model.length === 0) return false
-  if (options.provider === provider && options.model === model) return false
-  options.provider = provider
-  options.model = model
-  return true
-}

@@ -1,9 +1,9 @@
 # 交接文件（handoff）
 
 > 给新会话快速建立上下文。读本文件即可；细节在各自链接文件里。
-> 最后更新：**2026-11-12 12:20**（Asia/Shanghai）。
-> 本次更新重点：**temp/ 已清理，必留文档迁至 `docs/`**（2026-11-12 人工裁决：只留必留类，参考克隆用户别处有备份）。历史文档中的 `temp/` 路径为当时记录，其 raw/probe/gui-spike 产物已删；temp/ 现仅作 harness 运行时 scratch，可随时整删。
-> 项目状态：**阶段 3 已关闭，项目正式收尾（2026-11-12 人工确认），后续仅维护**。当前 = 0.2.3（已验收）。全部阶段（0/1/2/3）完成。
+> 最后更新：**2026-11-20 17:51**（Asia/Shanghai）。
+> 本次更新重点：**0.2.8-3 施工完成并经人工重启实机验收通过（2026-11-20）——插件彻底退出上下文压缩，tab 改「上下文状态」**；新增版本命名规则 `0.2.8-x` 与打包/安装机械预检；更正 §18/§19 与代码实况不符的描述（见 §20）；**`temp/` 已整目录清理**（施工图归档至 `docs/P2/code-debug-0.2.8-3.md`，见 §20 收尾清理）。
+> 项目状态：**阶段 3 已关闭，项目正式收尾，后续仅维护 + 修复迭代**。当前 = **0.2.8-3（已装 web profile，2026-11-20 人工实机验收通过）**。全部阶段（0/1/2/3）完成。
 
 ---
 
@@ -15,7 +15,7 @@
 
 - DSH **0.2.2-rc.1**（Windows）；opencode **v2.2.6**；Node **v24.21.0**
 - 正式插件代码在仓库根 **`plugin/`**（npm 包 `@hbk/dsh-opencode-local`，provider id `opencode-local`）
-- **当前仓库代码 = 0.2.6**（`plugin/package.json` 为 `0.2.6`）；0.2.2–0.2.5 已人工验收；**0.2.6 已于 2026-11-18 重启后人工验收通过，全部版本验收完毕，项目回到维护态**
+- **当前仓库代码 = 0.2.8-3**（`plugin/package.json` 为 `0.2.8-3`）；0.2.2–0.2.7、0.2.8-2、0.2.8-3 均已人工验收（0.2.8-3 于 2026-11-20 重启后实机验收通过）：**插件彻底退出上下文压缩**——删监听器/压缩存储/改路由函数，tab 改「上下文状态」仅留监测显示；版本命名规则 `0.2.8-x`；打包/安装机械预检，详见 §20
 - 安装在 **web profile**：`C:\Users\hbk\.dsh\profiles\web`（⭐ 2026-11-16 起：**用户使用形态为 web**，其对应插件 profile 即 `web`；desktop 与 web **共用同一 cordis 底座**。⚠️ 旧的「安装/验收走 desktop profile」约定**已过时**，勿再按 desktop 操作）
 - 参考源码克隆（opencode-dev / opencode2dsh-master / dsh-connect-workbuddy-main）**已随 temp/ 清理删除**（2026-11-12，用户别处有备份）；GUI 契约报告保留在 `docs/dsh-connect-workbuddy-analyze.md`
 - **用户新克隆的最新 opencode 发布源码在 `D:\opencode`**（git `12a661ea40`，2026-11-09 克隆），排查上游行为优先读它；DSH 源码在 `D:\deepseek-harness`（只读）
@@ -112,9 +112,9 @@ DSH 聊天(入口A) ──LlmAdapter──┐
 
 ## 10. 下一步
 
-**当前状态：0.2.6 已施工、打包、安装到 web profile，并已于 2026-11-18 重启后人工验收通过——本轮迭代关闭，项目回到维护态。**
+**当前状态：0.2.8-3 已施工、打包、机械预检通过、安装到 web profile，并经人工重启实机验收通过（2026-11-20，插件彻底退出上下文压缩）；0.2.8-2 及之前版本均已验收。**
 
-- 当前交付：`plugin/hbk-dsh-opencode-local-0.2.6.tgz`（28523 B / SHA256 `B15928B1…`，已装 **web** profile，**已验收**）；使用与故障速查见 `plugin/README.md`；上一稳定回退包 `plugin/hbk-dsh-opencode-local-0.2.5.tgz`（27051 B / `384183D7…`，已人工验收）。
+- 当前交付：`plugin/hbk-dsh-opencode-local-0.2.8-3.tgz`（25159 B / SHA256 `DA5096A897E911AFFF121B339B0ECAC61DF27C8EE761C01EA98F9565BEBB1728`，已装 **web** profile、**已验收**）；使用与故障速查见 `plugin/README.md`；**回退包 = `plugin/hbk-dsh-opencode-local-0.2.8-2.tgz`**（26692 B / `2CB3E7DC…`，注意其仍含诊断监听器，见 §19 更正）；**0.2.4–0.2.7 与 0.2.8.1 的 tgz 已不存在**。
 - 0.2.6 内容：**压缩模型偏好轻量化**——从 DSH profile 配置迁到插件自有 `~/.dsh-opencode-local/compaction.json`（全局），切换压缩模型**即时生效**（乐观更新 + 一次轻量写），不再触发 profile 重组/serve 重启；配套 `GET/POST /plugins/opencode-local/compaction` 路由、启动期旧值迁移、损坏/缺失回落官方默认。详见 `docs/P2/code-debug-0.2.6.md`、`docs/P2/impl-notes-0.2.6.md`。
 - 0.2.5 内容：①压缩请求识别（`purpose:'compaction'` → 精简形态 / 工具不放行 / `compact-` 标题）；②**设置页新增「上下文压缩」tab**（一键压缩 + 压缩专用模型选择器 + 只读上下文面板）；③**`llm/stream` 路由改写**把人工与自动压缩统一到选择器指定模型（默认官方，仅为保底，第三方 API 同级）；④402 限流正确改判 + 压缩内部有限重试。详见 `docs/P2/code-debug-0.2.5.md`、`docs/P2/impl-notes-0.2.5.md`。
 - 维护触发点：opencode / DSH 版本升级导致契约漂移；想启用 API 或分发他人（**须先补回**双入口并发压测、工具拦截第三层、安全审计 API 部分，见 §4）。
@@ -126,7 +126,7 @@ DSH 聊天(入口A) ──LlmAdapter──┐
 ## 11. 易踩的坑（提醒新会话）
 
 - 别再提「额度用完 / 需要登录」——已被人工明确否定，见 §5。
-- 安装/验收走 **desktop** profile，不是 web。
+- 安装/验收走 **web** profile（2026-11-16 起用户形态为 web；旧的「走 desktop」约定已废，见 §2）。
 - 排查上游行为读 `D:\opencode`（最新克隆）；`temp/opencode-dev` 旧快照已删。
 - `h2-tools.mjs` / `h3-stream.mjs` / `h4-api.mjs` 通过 `lib.mjs` 的 `firstModel()` 间接取模型，签名不变 ⇒ 0.2.2 **不需要改**；`ThinkingLevelSelect.tsx` 与 `api/server.ts` 也不需要改（附录已核实）。
 - 施工图 §3.3 的 `formatContext` 采用**四舍五入**（`981504 → 982K`、`1024 → 1K`），不是截断；样例表是唯一裁定。
@@ -193,3 +193,67 @@ DSH 聊天(入口A) ──LlmAdapter──┐
 - **⚠️ 部署插曲（已解决，留档防再犯）**：`dsh plugin add` **不会重载已运行 DSH 进程里的插件后端**——安装后立即使用时出现「前端新（0.2.6 请求新路由 `/plugins/opencode-local/compaction`）、后端旧（0.2.5 无此路由）」→ 404 空响应 → 浏览器报 `Failed to execute 'json' on 'Response': Unexpected end of JSON input`。**完全退出并重启 DSH 后消失**。结论：**`dsh plugin add` 之后必须重启 DSH 才算部署完成**；匿名 curl 探针（存在→401 / 不存在→404）可快速区分此类问题。
 - **遗留观察项（无碍使用）**：profile patch 中残留的旧 `compactionProvider/compactionModel` 键按裁决不清理（schema 已删，无害）；若 DSH 未来对插件存储/配置行为有变化，优先复查 `compaction.json` 读写。
 - git 提交仍由人工接管。
+
+## 16. 2026-11-19 0.2.7 执行记录（修复两个接线缺陷）
+
+> 计划依据 `docs/plan.md`；施工依据 `temp/code.md` v3（归档 `docs/P2/code-debug-0.2.7.md`）；执行记录 `docs/P2/impl-notes-0.2.7.md`。
+
+- **背景（实机暴露）**：0.2.6 验收后人工故意不配 `DEEPSEEK_API_KEY`、改选 nvidia 压缩模型，切换 `opencode-local/deepseek-v4.1-flash-free` 仍报 `llm-deepseek: no API key for provider route "deepseek-official"`；且上下文面板一直为空。只读探针实证为两个**接线缺陷**（非配置问题）：
+  1. **监听器从未触发**：Cordis 分发 waterfall 时按 llm 服务 context filter 过滤监听者（`vendor/cordis/src/events.ts:168-170`），插件独立 fiber 被过滤 → 0.2.5/0.2.6 的 `llm/stream` 改路由**从未真正生效**，压缩一直走默认官方路由。
+  2. **设置页会话推导无效**：root-scope 设置页手动 `ctx.get('sessions')` 拿不到当前会话 → 面板从不请求数据。
+- **修复**：① `index.ts` 监听器注册加 **`{ global: true, prepend: true }`**（DSH 自家 `session-title` 同款，绕过 filter）；② `CompactionTab.tsx` 改用 DSH 注入的 **`useSessions` 钩子** + 纯函数 `selectMainSessionId`（`SettingsRoot.tsx` 同款）；③ 版本 0.2.6 → 0.2.7。判断/改派逻辑、store、路由、patch 均未动。
+- **执行**：多 agent 并行（2 探针 + 3 工作包），三包自检全绿；串行验收 `typecheck` 0 错、`build` 成功无新增外部包、`run-all` **h1–h7 全过 `allPassed:true`**。
+- **打包**：`hbk-dsh-opencode-local-0.2.7.tgz` **28631 B** / SHA256 `621DE5076503E3E76B795D591B0B54231B265C056C504B8DEB9ACF45DAF1688C`；包内 5 条目。
+- **安装**：web profile `0.2.6 → 0.2.7` 成功；`cordis.patch.yml` 安装前后字节级相同（75567 B）；已装 lib 与构建产物一致；**未重启**。
+- **备份**：源码 `temp/backup-0.2.6-src/`；patch `temp/reinstall-backup/cordis.patch.yml.bak-0.2.7-20261119-170116`。
+- **Hotfix（同版本 0.2.7）**：首次安装后上下文 tab 崩溃（`useSessions is not a function`）——renderer 的 standard kit 只注入顶层 slot 组件，`CompactionTab` 是内部自渲染子组件、父组件漏透传 `useSessions`。修复：`OpencodeLocalCard.tsx:80` 透传 `useSessions: props.useSessions`。因版本未变 pnpm 报 `Already up to date`，改用 **remove + add 强制重装**；已装 `client.js` 与构建产物逐字节一致、patch 零差异。重打包 0.2.7（28637 B / `E9B30757…`）。详见 `docs/P2/impl-notes-0.2.7.md §8`。
+- **待办**：⚠️ **必须完全退出并重启 DSH**（host 不热重载）后按 `docs/P2/impl-notes-0.2.7.md §7` / `docs/plan.md §4` 实机验收（核心：切模型不再报 deepseek-official key 错、上下文面板有真实读数、tab 不再崩溃）。
+- git 提交仍由人工接管。
+
+## 17. 2026-11-20 0.2.8 执行记录（压缩改路由真正生效）
+
+> 计划依据 `docs/plan.md`；施工依据 `temp/code.md` v3；执行记录 `docs/P2/impl-notes-0.2.8.md`。
+
+- **背景**：0.2.7 安装重启后，上下文面板已修复，但切模型仍报 `deepseek-official` key 错——**压缩改路由仍未生效**。深入探针（含会话日志多帧解压）确认：`llm/stream` 监听器加了 `global:true` 仍**从未被调用**。
+- **根因**：两层问题叠加——① 0.2.7 把 `ctx.on(...)` 包在 **`ctx.effect()`** 内注册，导致监听器在真实 DSH 中**从未被触发**（去掉 effect 包装直接在 apply 注册后，诊断版立即证实 `listener fired`、`choice=nvidia/...`、`optionsFrozen=false`）；② 0.2.6 的启动迁移未把用户在 0.2.5 时代选的压缩模型（nvidia）迁入 `compaction.json`，写成了默认 `deepseek-official`（无 key）。
+- **修复（0.2.8）**：监听器注册改为 **apply 期间直接 `ctx.on('llm/stream', handler, { global: true, prepend: true })`**（disposer 挂 effect 仅做卸载清理）；诊断代码已移除，恢复正式改写逻辑。
+- **验证**：typecheck 0 错、build 成功、h1–h7 `allPassed:true`；打包 0.2.8（28622 B / SHA256 `197E8D6A…`，5 条目）；安装 web profile，patch 零差异，已装 lib 与构建产物一致。
+- **待办**：人工重启 DSH 后验收（压缩走 nvidia、面板有读数、无回归）。
+- git 提交仍由人工接管。
+
+## 18. 2026-11-20 0.2.8-1 执行记录（插件退出上下文压缩功能）
+
+> 计划依据 `docs/plan.md`（0.2.7 修复迭代的后续调整）；人工指令：「压缩上下文 tab 改为上下文状态，保留状态监测显示，删除压缩模型选择器与压缩按钮，插件不再做上下文压缩（人工另行接管）」；版本命名规则改为 `0.2.8-x`。
+
+- **功能调整**：「上下文压缩」tab 更名为「上下文状态」，仅保留上下文状态监测显示；**移除**压缩模型选择器、`压缩上下文` 按钮、`llm/stream` 监听器、`compaction-store.ts`、`compaction.json` 及相关路由。
+- **web profile 的 `cordis.patch.yml`**：保留并预置 compaction-basic 原生配置（`summarizationProvider: nvidia, summarizationModel: nvidia/nemotron-3-ultra-550b-a55b`）——压缩由人工另行接管时可直接使用/调整。
+- **修复记录**：patch 文件位置 71734 的非法控制字符 0x08（历史损坏）已字节级修复为 `bash` 的 `b`；Python yaml 全文校验通过（17 条目）。
+- **验证**：typecheck 0 错、build 成功、h1–h7 `allPassed:true`；0.2.8-1.tgz 25593 B / SHA256 `0936A260…`（5 条目）；安装 web profile 成功（0.2.8.1 → 0.2.8-1），lib 与构建产物一致，patch 零差异。
+- **待办**：人工重启 DSH 后实机验收（tab 显示「上下文状态」且读数正常；切模型不再报压缩错误）。
+- git 提交仍由人工接管。
+
+## 19. 2026-11-20 0.2.8-2 执行记录（监听器恢复 + 强制部署）
+
+> 前置：0.2.8-1 重启实测仍报 deepseek-official no key。排查发现 **0.2.7 的 `index.js` 因 pnpm 同版本缓存从未真正部署**（remove+add 后仍 stale），且首次打包的 0.2.8.tgz 被系统删除——「修复无效」实为「修复未部署」。已通过 force copy 纠正部署状态。
+
+- **诊断决定性结论**：监听器**能触发**（DIAG2 + llm-diag 多次证实）、能读到 nvidia 偏好、options 未冻结、改写执行——**但改写后的压缩仍走 deepseek-official**。跨工作区会话的压缩**不经过插件 fiber 的监听器**（Cordis 多 isolate/多 root 树，两个子代理探针 + 会话日志交叉证实）。
+- **修复（0.2.8-2）**：**放弃 llm/stream 事件拦截**，改用 **compaction-basic 原生配置**——web profile 的 `cordis.patch.yml` 给 compaction-basic 加 `summarizationProvider: nvidia, summarizationModel: nvidia/nemotron-3-ultra-550b-a55b`。压缩从源头走 nvidia，**所有会话/作用域原生生效**。插件移除 `llm/stream` 监听器与压缩偏好存储；patch 顺带修复 0x08 非法字符。
+- **验证**：typecheck 0 错、build 成功、h1–h7 `allPassed:true`；0.2.8-2.tgz 26692 B / SHA256 `2CB3E7DC…`（5 条目）；安装 web profile 成功（0.2.8-1 → 0.2.8-2），lib 一致，patch 零差异。
+- **待办**：人工重启 DSH 后实机验收（压缩走 nvidia、面板读数、无回归）。
+- git 提交仍由人工接管。
+- ⚠️ **事后更正（2026-11-20 晚）**：本节与 §18 所述「插件移除 `llm/stream` 监听器与压缩偏好存储」**与实际交付的 0.2.8-2 包不符**——实测包内 `lib/index.js` 仍含监听器与 `llm-diag` 诊断代码，`compaction-store.ts` 仍在。真正的移除由 **0.2.8-3** 完成（见 §20）。
+
+## 20. 2026-11-20 0.2.8-3 执行记录（插件彻底退出上下文压缩）
+
+> 人工裁决（2026-11-20）：**原来的插件侧压缩改路由思路本身不可行，直接放弃——本插件不做上下文压缩，压缩由人工另行方案接管**。tab「压缩上下文」改「上下文状态」，仅保留用量监测显示；删除压缩模型选择器与「压缩上下文」按钮及全部后端压缩逻辑。版本命名规则由 `0.2.8.x` 改 **`0.2.8-x`**（四段式 semver 非法，pnpm 拒绝；此前未预检即安装属流程缺陷，本轮起打包/安装前强制机械预检）。
+> 计划：`docs/plan.md`（已批准，§5 记录三项裁决）；施工图：`temp/code.md`（多 agent 协作版）；执行记录：`docs/P2/impl-notes-0.2.8-3.md`。
+
+- **执行方式**：能力探针（2 子代理写 10 字节探针文件）通过 → **W1–W7 七工作包并行落盘**（index.ts / config.ts / 删 compaction-store.ts / README / package.json / h6 / h7，文件互不重叠）→ 主执行者串行验证。全部自检通过，无 MISMATCH、无越界改动。
+- **变更要点**：index.ts 删 `llm/stream` 监听器整块（含 `llm-diag` 诊断代码）等 6 处（140→93 行）；config.ts 删 `applyCompactionRoute`（141→120 行）；`compaction-store.ts` 整文件删除；README 压缩章节改写；版本 0.2.8-3；h6/h7 裁剪 store/route 断言，h7 新增「上下文状态」改名守卫。**保留**：适配器对 `purpose:'compaction'` 请求的形态处理、`/context` 状态路由、CompactionTab 纯状态展示。
+- **验证**：typecheck 双 tsconfig 0 错；build 成功（`lib/index.js` 47843 B / SHA256 `A1A9F9EE…`；`lib/client.js` 25657 B / SHA256 `F017622E…`，与上版一致——client 零改动）；plugin/src 压缩残留扫描 0；run-all **h1–h7 `allPassed:true`**。
+- **⚠️ 上游漂移 + 插曲**：opencode 当日 **v2.2.7 → v2.3.2**。首跑 h6 报 `SSE 401`——心跳重启竞态致新旧 serve 进程短暂并存（非代码缺陷）；用真实 ServeManager 对 v2.3.2 实测 `/api/info`、`/api/event`、`/api/model` 鉴权均 200，证实兼容；清理孤儿进程重跑即全过。所有 opencode 残留进程已清零。
+- **打包 + 机械预检**：`hbk-dsh-opencode-local-0.2.8-3.tgz` **25159 B** / SHA256 `DA5096A897E911AFFF121B339B0ECAC61DF27C8EE761C01EA98F9565BEBB1728`，5 条目；预检四项（semver 非四段式 / 条目数 / lib 哈希一致 / README 新表述）全过。
+- **安装**：web profile `0.2.8-2 → 0.2.8-3` 成功；已装 lib 与构建产物逐字节一致；`cordis.patch.yml` 字节级未变（74,672 B），compaction-basic + nvidia 配置原样保留。备份 `temp/reinstall-backup/cordis.patch.yml.bak-0.2.8-3-20261120-174520`。
+- **验收结果（2026-11-20 人工确认：修改生效、任务完成）**：✅ 重启后按 `docs/plan.md` §4 实机验收通过——tab=「上下文状态」读数正常、无压缩选择器/按钮、切模型无压缩 key 错、`temp/llm-diag.log` 不再增长、无回归。本轮迭代闭环。
+- 遗留不变项：`~/.dsh-opencode-local/compaction.json`（失效残留，按裁决不删）；git 提交仍由人工接管。
+- **收尾清理（2026-11-20，人工发起）**：`temp/` 已**整目录清理**并重建为空目录（scratch，harness 运行时会自动重建其子目录）。要点：①本轮施工图 `temp/code.md` 已先归档为 `docs/P2/code-debug-0.2.8-3.md`；②`temp/debug.md`（0.2.6 方案）此前已归档于 `docs/P2/code-debug-0.2.6.md`；③`temp/backup-0.2.6-src/` 删除——0.2.6 源码可从 git 提交 `7dfba3e` 恢复，备份冗余；④`session-logs/`、`decompress*.cjs`、`yamlcheck*`、`llm-diag.log` 等 0.2.8 排障产物全部删除；⑤`reinstall-backup/` 历史 patch 备份删除（当前 patch 已验证，无需回退素材）；⑥impl-harness 产物为可再生 scratch，重跑 `run-all.mjs` 自动重建。**此前各节中指向 `temp/` 的路径自此均为历史记录。**
